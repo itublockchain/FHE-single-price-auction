@@ -27,7 +27,7 @@ contract AuctionFactory {
         address contractAddress;
         address tokenAddress;
         uint256 supply;
-        bool isActive;
+        bool isAvailable;
     }
     
     uint256 private counter;
@@ -49,7 +49,7 @@ contract AuctionFactory {
         string memory _desc,
         uint256 deadline,
         uint256 _supply
-    ) public returns (address auctionAddress) {
+    ) external returns (address auctionAddress) {
         Auction newAuction = new Auction(
             _title,
             _desc,
