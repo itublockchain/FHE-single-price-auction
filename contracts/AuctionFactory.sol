@@ -2,8 +2,10 @@ pragma solidity ^0.8.24;
 
 import "./Auction.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./interfaces/IAuctionFactory.sol";
 
-contract AuctionToken is ERC20 {
+//Burası confidential yapılabilir
+contract AuctionToken is ERC20, IAuctionFactory {
     constructor(
         string memory name, 
         string memory symbol, 
@@ -35,6 +37,7 @@ contract AuctionFactory {
 
     //indexed eklenebilir
     event AuctionCreated(
+        address indexed auctionAddress,
         string title,
         string desc,
         uint256 startTime,
@@ -49,7 +52,7 @@ contract AuctionFactory {
         string memory _desc,
         uint256 deadline,
         uint256 _supply
-    ) external returns (address auctionAddress) {
+    ) external override returns (address auctionAddress) {
         Auction newAuction = new Auction(
             _title,
             _desc,
@@ -75,6 +78,7 @@ contract AuctionFactory {
         );
 
         emit AuctionCreated(
+            auctionAddress,
             _title, 
             _desc, 
             block.timestamp, 

@@ -3,9 +3,8 @@ pragma solidity ^0.8.24;
 import "fhevm/lib/TFHE.sol";
 import {SepoliaZamaFHEVMConfig} from "fhevm/config/ZamaFHEVMConfig.sol";
 import "./interfaces/IAuction.sol";
-import "./libraries/BidSorting.sol";
 
-contract Auction is SepoliaZamaFHEVMConfig {
+contract Auction is SepoliaZamaFHEVMConfig, IAuction{
 
     struct Bid {
         address bidder;
@@ -14,7 +13,7 @@ contract Auction is SepoliaZamaFHEVMConfig {
         uint32 amount;
         uint256 timestamp;
         //sonradan dataları dec ederiz belki
-        bool isRevealed;
+        //bool isRevealed;
     }
 
     //Token adresini de buraya ekleyebilirim
@@ -40,8 +39,8 @@ contract Auction is SepoliaZamaFHEVMConfig {
     );
 
     constructor(
-        string _title,
-        string _desc,
+        string memory _title,
+        string memory _desc,
         uint256 _deadline,
         uint256 _supply,
         address _seller
@@ -61,20 +60,67 @@ contract Auction is SepoliaZamaFHEVMConfig {
     }
 
     function submitBid(
-        bytes calldata encPrice,
-        bytes calldata priceProof
-    ) external returns() {
+        einput encPrice,
+        bytes calldata priceProof,
+        uint256 _amount
+    ) external override returns(uint256 bidId) {
+        require(isAvailable, "Auction is not available");
         require(block.timestamp >= startTime, "Auction not started");
         require(block.timestamp < endTime, "Auction ended");
         require(!hasBid[msg.sender], "You have already a bid");
     
+    
         euint32 price = TFHE.asEuint32(encPrice, priceProof);
+        //TFHE.allowThis(price)
     
+        ebool isValidPrice = TFHE.gt(price, TFHE.asEuint32(0));
+        //decrypt kısmı karışık hatalı olabilir bu
+        require(TFHE.decrypt(isValidPrice), "Invalid price");
 
-        //......
+        bidId = counter;
+        bids[bidId] = Bid(
+            msg.sender,
+            price,
+            _amount,
+            block.timestamp
+            //false
+        );
+        
+        //insert part 
+
+        if(bidIds.length == 0) {
+            bidIds.push(bidId);
+        }
+
+        else {
+            uint256 low = 0;
+            uint256 high = bidIds.length;
+        
+            while (low < high) {
+                uint256 mid = (low + high) / 2;
+            
+                ebool isGreater = TFHE.gt(
+                    bids[bidId].pricePerToken,
+                    bids[bidIds[mid]].pricePerToken
+                );
+            
+                if (TFHE.decrypt(isGreater)) {
+                    high = mid;
+                } else {
+                    low = mid + 1;
+                }
+            }
+
+            bidIds.push(0); 
+            for (uint256 i = bidIds.length - 1; i > low; i--) {
+                bidIds[i] = bidIds[i - 1];
+            }
+            bidIds[low] = bidId;        
+        }
     
+        hasBid[msg.sender] = true;
+        counter++;
+
+        emit BidSubmitted(bidId, msg.sender, block.timestamp);
     }
-    
-
-
 }
