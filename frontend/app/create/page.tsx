@@ -15,13 +15,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns"
+import { format } from "date-fns";
+
+import { useState } from "react";
 
 const formSchema = z.object({
   title: z
@@ -38,7 +41,7 @@ const formSchema = z.object({
 });
 
 export default function Create() {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [date, setDate] = React.useState<Date | undefined>();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,7 +49,7 @@ export default function Create() {
       title: "",
       amount: "",
       description: "",
-      date: new Date(),
+      date: undefined,
     },
   });
 
@@ -55,12 +58,12 @@ export default function Create() {
   }
 
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center">
+    <div className="w-full h-screen flex flex-col justify-center items-center bg-background dark text-foreground">
       <Form {...form}>
         <h1 className="text-7xl">Create Auction</h1>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 bg-white p-6 rounded-lg shadow-md w-2/3"
+          className="space-y-8 p-6 rounded-lg w-2/3"
         >
           <div className="grid grid-cols-3 gap-4">
             <FormField
@@ -102,11 +105,11 @@ export default function Create() {
                           variant={"outline"}
                           className={cn(
                             "w-full justify-center text-left font-normal",
-                            !date && "text-muted-foreground"
+                            !field.value && "text-foreground"
                           )}
                         >
-                          {date ? (
-                            format(date, "PPP")
+                          {field.value ? (
+                            format(field.value, "PPP")
                           ) : (
                             <span>Pick a date</span>
                           )}
@@ -115,8 +118,12 @@ export default function Create() {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={date}
-                          onSelect={setDate}
+                          selected={field.value}
+                          onSelect={(date) => {
+                            if (!date) return;
+                            if (date?.getTime() < Date.now()) return;
+                            field.onChange(date)
+                        }}
                         />
                       </PopoverContent>
                     </Popover>
@@ -133,17 +140,13 @@ export default function Create() {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <textarea
-                    className="w-full border rounded-md p-2"
-                    placeholder="Write a description"
-                    {...field}
-                  />
+                    <Textarea {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-between space-x-4">
             <Button type="button" variant="outline">
               Cancel
             </Button>
