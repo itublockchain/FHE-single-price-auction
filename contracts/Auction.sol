@@ -12,11 +12,9 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
     struct Bid {
         address bidder;
         euint32 pricePerToken;
-        // euint32 amount
-        uint256 amount;
+        euint32 amount;
         uint256 timestamp;
-        //sonradan dataları dec ederiz belki
-        //bool isRevealed;
+        bool isRevealed;
     }
 
     //Token adresini de buraya ekleyebilirim
@@ -28,12 +26,11 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
     address public immutable seller;
     bool public isAvailable;
 
-
     mapping(uint256 => Bid) private bids;
     uint256[] private bidIds; 
-    uint256 private counter;
     mapping(address => bool) public hasBid;
 
+    uint256 private counter;
     bool decValue;
 
     constructor(
@@ -57,35 +54,48 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         counter = 0;
     }
 
-    //einput encPrice,
-    //bytes calldata priceProof,
     function submitBid(
-        uint32 encPrice,
-        uint256 _amount
-    ) external override returns(uint256 bidId) {
+        einput encPrice,
+        bytes calldata priceProof,
+        einput encAmount,
+        bytes calldata amountProof
+    ) external payable override returns(uint256 bidId) {
         require(isAvailable, "Auction is not available");
         require(block.timestamp >= startTime, "Auction not started");
         require(block.timestamp < endTime, "Auction ended");
         require(!hasBid[msg.sender], "You have already a bid");
     
-        //euint32 price = TFHE.asEuint32(encPrice, priceProof);
+        euint32 price = TFHE.asEuint32(encPrice, priceProof);
+        euint32 amount = TFHE.asEuint32(encAmount, amountProof);
+        require(TFHE.isSenderAllowed(price), "Unauthorized access");
+        require(TFHE.isSenderAllowed(amount), "Unauthorized access");
+        require(TFHE.isInitialized(price), "Price not encrypted properly!");
+        require(TFHE.isInitialized(amount), "Amount not encrypted properly!");
 
-        euint32 price = TFHE.asEuint32(encPrice);
-        //require(TFHE.isInitialized(price), "Price not encrypted properly!");
+        //TFHE.allowThis(price); GEREK YOK SANKİ BUNLARA
+        
+        ebool isValidPrice = TFHE.gt(price, TFHE.asEuint32(0));
+        TFHE.allowThis(isValidPrice);
+        requestBool(isValidPrice);
+        require(decValue, "Invalid price");
+        ebool isValidAmount = TFHE.gt(amount, TFHE.asEuint32(0));
+        TFHE.allowThis(isValidAmount);
+        requestBool(isValidAmount);
+        require(decValue, "Invalid amount");
 
-        //TFHE.allowThis(price)
-    
-        //ebool isValidPrice = TFHE.gt(price, TFHE.asEuint32(0));
-        //decrypt kısmı karışık hatalı olabilir bu
-        //require(TFHE.decrypt(isValidPrice), "Invalid price");
+        uint256 lockedAmount = msg.value;
+        ebool isValidLock = TFHE.ge(TFHE.asEuint32(lockedAmount), TFHE.mul(price, amount));  
+        TFHE.allowThis(isValidLock);
+        requestBool(isValidLock);
+        require(isValidLock, "Insufficient locked");
 
         bidId = counter;
         bids[bidId] = Bid(
             msg.sender,
             price,
-            _amount,
-            block.timestamp
-            //false
+            amount,
+            block.timestamp,
+            false
         );
         
         //insert part 
@@ -105,6 +115,7 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
                     bids[bidId].pricePerToken,
                     bids[bidIds[mid]].pricePerToken
                 );
+                TFHE.allowThis(isGreater);
                 requestBool(isGreater);
                 if (decValue) {
                     high = mid;

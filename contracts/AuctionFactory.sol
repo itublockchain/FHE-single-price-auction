@@ -20,7 +20,6 @@ contract AuctionToken is ERC20 {
 contract AuctionFactory is IAuctionFactory {
     
     //Title aynı zamanda coin sembolü ve adı olcak
-    //Title yerine id belki
     struct AuctionStruct {
         string title;
         string desc;
@@ -33,17 +32,20 @@ contract AuctionFactory is IAuctionFactory {
         bool isAvailable;
     }
     
-    uint256 private counter;
-    mapping(string => AuctionStruct) public auctions;   
+    //public for now
+    uint256 public counter;
+    mapping(uint256 => AuctionStruct) public auctions;   
     
-    constructor() {}
+    constructor() {
+        counter = 1;
+    }
 
     function createAuction(
         string memory _title,
         string memory _desc,
         uint256 deadline,
         uint256 _supply
-    ) external override returns (address auctionAddress) {
+    ) external override returns (address auctionAddress, uint256 _auctionId) {
         Auction newAuction = new Auction(
             _title,
             _desc,
@@ -56,7 +58,8 @@ contract AuctionFactory is IAuctionFactory {
 
         AuctionToken newToken = new AuctionToken(_title, _title, _supply, auctionAddress);
 
-        auctions[_title] = AuctionStruct(
+        _auctionId = counter;
+        auctions[_auctionId] = AuctionStruct(
             _title,
             _desc,
             block.timestamp,
@@ -67,6 +70,7 @@ contract AuctionFactory is IAuctionFactory {
             _supply,
             true
         );
+        counter++;
 
         emit AuctionCreated(
             auctionAddress,

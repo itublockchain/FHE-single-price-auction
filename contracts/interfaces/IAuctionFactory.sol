@@ -8,7 +8,7 @@ interface IAuctionFactory {
         string desc,
         uint256 startTime,
         uint256 endTime,
-        address seller
+        address indexed seller
     );
 
     function createAuction(
