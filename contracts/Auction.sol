@@ -1,24 +1,27 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 import "fhevm/lib/TFHE.sol";
-import {SepoliaZamaFHEVMConfig} from "fhevm/config/ZamaFHEVMConfig.sol";
+import { SepoliaZamaFHEVMConfig } from "fhevm/config/ZamaFHEVMConfig.sol";
+import { SepoliaZamaGatewayConfig } from "fhevm/config/ZamaGatewayConfig.sol";
+import "fhevm/gateway/GatewayCaller.sol";
 import "./interfaces/IAuction.sol";
 
-contract Auction is SepoliaZamaFHEVMConfig, IAuction{
+contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCaller, IAuction{
 
     struct Bid {
         address bidder;
         euint32 pricePerToken;
         // euint32 amount
-        uint32 amount;
+        uint256 amount;
         uint256 timestamp;
         //sonradan dataları dec ederiz belki
         //bool isRevealed;
     }
 
     //Token adresini de buraya ekleyebilirim
-    string public immutable title;
-    string public immutable desc;
+    string public title;
+    string public desc;
     uint256 public immutable startTime;
     uint256 public immutable endTime;
     uint256 public immutable supply;
@@ -31,12 +34,7 @@ contract Auction is SepoliaZamaFHEVMConfig, IAuction{
     uint256 private counter;
     mapping(address => bool) public hasBid;
 
-    //Yeni eventler eklenebilir
-    event BidSubmitted(
-        uint256 indexed bidId,
-        address indexed bidder,
-        uint256 timestamp
-    );
+    bool decValue;
 
     constructor(
         string memory _title,
@@ -59,9 +57,10 @@ contract Auction is SepoliaZamaFHEVMConfig, IAuction{
         counter = 0;
     }
 
+    //einput encPrice,
+    //bytes calldata priceProof,
     function submitBid(
-        einput encPrice,
-        bytes calldata priceProof,
+        uint32 encPrice,
         uint256 _amount
     ) external override returns(uint256 bidId) {
         require(isAvailable, "Auction is not available");
@@ -69,13 +68,16 @@ contract Auction is SepoliaZamaFHEVMConfig, IAuction{
         require(block.timestamp < endTime, "Auction ended");
         require(!hasBid[msg.sender], "You have already a bid");
     
-    
-        euint32 price = TFHE.asEuint32(encPrice, priceProof);
+        //euint32 price = TFHE.asEuint32(encPrice, priceProof);
+
+        euint32 price = TFHE.asEuint32(encPrice);
+        //require(TFHE.isInitialized(price), "Price not encrypted properly!");
+
         //TFHE.allowThis(price)
     
-        ebool isValidPrice = TFHE.gt(price, TFHE.asEuint32(0));
+        //ebool isValidPrice = TFHE.gt(price, TFHE.asEuint32(0));
         //decrypt kısmı karışık hatalı olabilir bu
-        require(TFHE.decrypt(isValidPrice), "Invalid price");
+        //require(TFHE.decrypt(isValidPrice), "Invalid price");
 
         bidId = counter;
         bids[bidId] = Bid(
@@ -103,8 +105,8 @@ contract Auction is SepoliaZamaFHEVMConfig, IAuction{
                     bids[bidId].pricePerToken,
                     bids[bidIds[mid]].pricePerToken
                 );
-            
-                if (TFHE.decrypt(isGreater)) {
+                requestBool(isGreater);
+                if (decValue) {
                     high = mid;
                 } else {
                     low = mid + 1;
@@ -123,4 +125,16 @@ contract Auction is SepoliaZamaFHEVMConfig, IAuction{
 
         emit BidSubmitted(bidId, msg.sender, block.timestamp);
     }
+
+    function requestBool(ebool encValue) public {
+        uint256[] memory cts = new uint256[](1);
+        cts[0] = Gateway.toUint256(encValue);
+        Gateway.requestDecryption(cts, this.myCustomCallback.selector, 0, block.timestamp + 100, false);
+    }
+
+    function myCustomCallback(uint256 /*requestID*/, bool decryptedInput) public onlyGateway returns (bool) {
+        decValue = decryptedInput;
+        return decValue;
+    }
 }
+

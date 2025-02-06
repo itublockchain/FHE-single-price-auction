@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 import "./Auction.sol";
@@ -5,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/IAuctionFactory.sol";
 
 //Burası confidential yapılabilir
-contract AuctionToken is ERC20, IAuctionFactory {
+contract AuctionToken is ERC20 {
     constructor(
         string memory name, 
         string memory symbol, 
@@ -16,11 +17,11 @@ contract AuctionToken is ERC20, IAuctionFactory {
     }
 }
 
-contract AuctionFactory {
+contract AuctionFactory is IAuctionFactory {
     
     //Title aynı zamanda coin sembolü ve adı olcak
     //Title yerine id belki
-    struct Auction {
+    struct AuctionStruct {
         string title;
         string desc;
         uint256 startTime;
@@ -33,17 +34,7 @@ contract AuctionFactory {
     }
     
     uint256 private counter;
-    mapping(string => Auction) public auctions;   
-
-    //indexed eklenebilir
-    event AuctionCreated(
-        address indexed auctionAddress,
-        string title,
-        string desc,
-        uint256 startTime,
-        uint256 endTime,
-        address seller
-    );
+    mapping(string => AuctionStruct) public auctions;   
     
     constructor() {}
 
@@ -65,7 +56,7 @@ contract AuctionFactory {
 
         AuctionToken newToken = new AuctionToken(_title, _title, _supply, auctionAddress);
 
-        auctions[_title] = Auction(
+        auctions[_title] = AuctionStruct(
             _title,
             _desc,
             block.timestamp,
