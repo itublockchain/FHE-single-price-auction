@@ -2,10 +2,12 @@
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@/components/ui/button";
+import logo from "../../public/logo.svg";
+import Image from "next/image";
 
 export default function Navbar() {
-    return (<div className="w-full border-b-[1px] absolute px-[150px] h-[80px] bg-background text-foreground flex items-center justify-around">
-        <div><h1>Logo</h1></div>
+    return (<div className="w-full border-b-[1px] sticky top-0 px-[150px] h-[80px] bg-background text-foreground flex items-center justify-around">
+        <div><Image src={logo} alt="logo" /></div>
         <div className="flex justify-around items-center gap-12">
             <div>Home</div>
             <div>Create Auction</div>
