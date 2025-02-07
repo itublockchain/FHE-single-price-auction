@@ -12,6 +12,7 @@
     "@hookform/resolvers": "^3.10.0",
     "@lexical/markdown": "^0.23.1",
     "@lexical/react": "^0.23.1",
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-popover": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
@@ -30,6 +31,7 @@
     "react-hook-form": "^7.54.2",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
     "viem": "^2.22.22",
     "wagmi": "^2.14.10",
     "zod": "^3.24.1"
