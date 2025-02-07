@@ -24,7 +24,11 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+import EmojiPicker from "emoji-picker-react";
+import emojiImage from "../../public/smile-plus.svg"
+
 import { useState } from "react";
+import Image from "next/image";
 
 const formSchema = z.object({
   title: z
@@ -38,16 +42,19 @@ const formSchema = z.object({
   amount: z.string(),
   description: z.string(),
   date: z.date(),
+  emoji: z.string().max(1),
 });
 
 export default function Create() {
   const [date, setDate] = React.useState<Date | undefined>();
+  const [emojiData, setEmojiData] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       amount: "",
+      emoji: "",
       description: "",
       date: undefined,
     },
@@ -65,7 +72,7 @@ export default function Create() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 p-6 rounded-lg w-2/3"
         >
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <FormField
               control={form.control}
               name="title"
@@ -79,6 +86,31 @@ export default function Create() {
                 </FormItem>
               )}
             />
+            {emojiData ? <span className="text-3xl flex justify-center items-center">{emojiData}</span> : <FormField
+              control={form.control}
+              name="emoji"
+              render={({ field }) => (
+                <FormItem className="flex justify-center items-center">
+                  <FormControl>
+                  <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant={"outline"} className="">
+                          <Image src={emojiImage} alt="emoji" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <EmojiPicker onEmojiClick={(emoji, e) => {
+                          setEmojiData(emoji.emoji)
+                          console.log(emoji.emoji)
+                          field.onChange(emoji.emoji)
+                        }} />
+                      </PopoverContent>
+                    </Popover>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />}
             <FormField
               control={form.control}
               name="amount"
