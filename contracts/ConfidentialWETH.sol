@@ -4,8 +4,7 @@ pragma solidity ^0.8.24;
 import "fhevm/lib/TFHE.sol";
 import "fhevm/gateway/GatewayCaller.sol";
 import { ReentrancyGuardTransient } from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
-import { ConfidentialERC20 } from "./ConfidentialERC20.sol";
-import { IConfidentialERC20Wrapped } from "./IConfidentialERC20Wrapped.sol";
+import "fhevm-contracts/contracts/token/ERC20/extensions/ConfidentialERC20Mintable.sol";
 
 /**
  * @title   ConfidentialWETH.

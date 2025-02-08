@@ -40,8 +40,8 @@ contract AuctionFactory is IAuctionFactory {
 
     constructor() {
         counter = 1;
-        ConfidentialWETH paymentToken = new ConfidentialWETH(1 days);
-        paymentToken = address(ConfidentialWETH);
+        ConfidentialWETH paymentTokenContract = new ConfidentialWETH(1 days);
+        paymentToken = address(paymentTokenContract);
     }
 
     function createAuction(

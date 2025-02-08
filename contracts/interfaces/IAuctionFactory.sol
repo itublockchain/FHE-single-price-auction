@@ -16,7 +16,20 @@ interface IAuctionFactory {
         string memory desc,
         uint256 deadline,
         uint256 supply
-    ) external returns (address auctionAddress);
+    ) external returns (address auctionAddress, uint256 auctionId);
 
-    //getauction falan filan eklenebilir
+    // function getAuction(uint256 auctionId) external view returns (
+    //     string memory title,
+    //     string memory desc,
+    //     uint256 startTime,
+    //     uint256 endTime,
+    //     address seller,
+    //     address contractAddress,
+    //     address tokenAddress,
+    //     uint256 supply,
+    //     bool isAvailable
+    // );
+    
+    // function getTotalAuctions() external view returns (uint256);
 }
+
