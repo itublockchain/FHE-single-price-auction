@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "./Auction.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/IAuctionFactory.sol";
+import "./ConfidentialWETH.sol";
 
 //Burası confidential yapılabilir
 contract AuctionToken is ERC20 {
@@ -34,10 +35,13 @@ contract AuctionFactory is IAuctionFactory {
     
     //public for now
     uint256 public counter;
-    mapping(uint256 => AuctionStruct) public auctions;   
-    
+    mapping(uint256 => AuctionStruct) public auctions;
+    address public paymentToken; 
+
     constructor() {
         counter = 1;
+        ConfidentialWETH paymentToken = new ConfidentialWETH(1 days);
+        paymentToken = address(ConfidentialWETH);
     }
 
     function createAuction(
@@ -46,17 +50,21 @@ contract AuctionFactory is IAuctionFactory {
         uint256 deadline,
         uint256 _supply
     ) external override returns (address auctionAddress, uint256 _auctionId) {
+        AuctionToken newToken = new AuctionToken(_title, _title, _supply, address(this));
+        address tokenAddress = address(newToken);
+        
         Auction newAuction = new Auction(
             _title,
             _desc,
             deadline,
             _supply,
-            msg.sender
+            msg.sender,
+            tokenAddress,
+            paymentToken
         );
 
         auctionAddress = address(newAuction);  
-
-        AuctionToken newToken = new AuctionToken(_title, _title, _supply, auctionAddress);
+        newToken.transfer(auctionAddress, _supply);
 
         _auctionId = counter;
         auctions[_auctionId] = AuctionStruct(
