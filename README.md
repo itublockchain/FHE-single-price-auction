@@ -1,214 +1,167 @@
-# Hardhat Template [![Open in Gitpod][gitpod-badge]][gitpod] [![Github Actions][gha-badge]][gha] [![Hardhat][hardhat-badge]][hardhat] [![License: MIT][license-badge]][license]
+# 🏰 Confidential Single-Price Auction: Revolutionizing Token Sales with Privacy
 
-[gitpod]: https://gitpod.io/#https://github.com/zama-ai/fhevm-hardhat-template
-[gitpod-badge]: https://img.shields.io/badge/Gitpod-Open%20in%20Gitpod-FFB45B?logo=gitpod
-[gha]: https://github.com/zama-ai/fhevm-hardhat-template/actions
-[gha-badge]: https://github.com/zama-ai/fhevm-hardhat-template/actions/workflows/ci.yml/badge.svg
-[hardhat]: https://hardhat.org/
-[hardhat-badge]: https://img.shields.io/badge/Built%20with-Hardhat-FFDB1C.svg
-[license]: https://opensource.org/licenses/MIT
-[license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
+<div align="center">
+  <img src="https://img.shields.io/badge/Technology-fhEVM-blueviolet?style=for-the-badge&logo=ethereum" alt="fhEVM Technology"/>
+  <img src="https://img.shields.io/badge/Privacy-Encrypted-green?style=for-the-badge&logo=privacy" alt="Privacy Focused"/>
+  <img src="https://img.shields.io/badge/Zama-Bounty%20Submission-blue?style=for-the-badge" alt="Zama Bounty"/>
+</div>
 
-A Hardhat-based template for developing Solidity smart contracts, with sensible defaults.
+## 🌟 Project Vision: Redefining Auction Transparency and Privacy
 
-- [Hardhat](https://github.com/nomiclabs/hardhat): compile, run and test smart contracts
-- [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript bindings for smart contracts
-- [Ethers](https://github.com/ethers-io/ethers.js/): renowned Ethereum library and wallet implementation
-- [Solhint](https://github.com/protofire/solhint): code linter
-- [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
-- [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter
+### 💡 The Problem We Solve
+Traditional auctions suffer from critical vulnerabilities:
+- **Bid Sniping**: Last-minute bid manipulations
+- **Price Transparency**: Revealing bidder strategies
+- **Privacy Concerns**: Exposed bidder identities and intentions
+- **Auction Resolution Issues**: Unclear handling of edge cases
 
-## Getting Started
+### 🔒 Our Revolutionary Solution
+We've developed a cutting-edge, confidential single-price auction system leveraging Zama's Fully Homomorphic Encryption Virtual Machine (fhEVM) to address these challenges.
 
-Click the [`Use this template`](https://github.com/zama-ai/fhevm-hardhat-template/generate) button at the top of the
-page to create a new repository with this repo as the initial state.
+## 🚀 Core Innovation: Encrypted Sealed Bidding
 
-## Features
+### How It Works
+1. **Encrypted Submissions**:
+   - Bids are fully encrypted
+   - No one can see the actual bid values
+   - Cryptographic guarantees of bid integrity
 
-This template builds upon the frameworks and libraries mentioned above, so for details about their specific features,
-please consult their respective documentations.
+2. **Fair Price Discovery**:
+   - Settlement price determined by the lowest bid to clear all tokens
+   - Ensures market-driven, transparent pricing
+   - Prevents manipulation and unfair advantages
 
-For example, for Hardhat, you can refer to the [Hardhat Tutorial](https://hardhat.org/tutorial) and the
-[Hardhat Docs](https://hardhat.org/docs). You might be in particular interested in reading the
-[Testing Contracts](https://hardhat.org/tutorial/testing-contracts) section.
+## 🔍 Deep Dive: Technical Architecture
 
-### Sensible Defaults
+### 🛡️ Privacy Layers
+- **Homomorphic Encryption**: Compute on encrypted data
+- **Zero-Knowledge Proofs**: Validate bids without revealing contents
+- **Secure Multiparty Computation**: Distributed bid processing
 
-This template comes with sensible default configurations in the following files:
+### 🧩 System Components
+- **AuctionFactory.sol**: Dynamic auction creation
+- **Auction.sol**: Core auction mechanics
 
-```text
-├── .editorconfig
-├── .eslintignore
-├── .eslintrc.yml
-├── .gitignore
-├── .prettierignore
-├── .prettierrc.yml
-├── .solcover.js
-├── .solhint.json
-└── hardhat.config.ts
+## 📊 Auction Workflow
+
+```mermaid
+graph TD
+    A[Auction Creation] --> B[Bid Encryption]
+    B --> C[Bid Submission]
+    C --> D[Auction Closure]
+    D --> E[Price Settlement]
+    E --> F[Token Distribution]
 ```
 
-### VSCode Integration
+## 🎯 Key Features
 
-This template is IDE agnostic, but for the best user experience, you may want to use it in VSCode alongside Nomic
-Foundation's [Solidity extension](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity).
+### 🔒 Unparalleled Privacy
+- **Encrypted Bids**: Complete bid confidentiality
+- **Sealed Submission**: Prevent strategic bidding
+- **Identity Protection**: Anonymous participation
 
-### GitHub Actions
+### 🌈 Flexible Auction Design
+- Support for ETH and ERC20 tokens
+- Configurable auction parameters
+- Adaptive settlement mechanisms
 
-This template comes with GitHub Actions pre-configured. Your contracts will be linted and tested on every push and pull
-request made to the `main` branch.
+## 🤑 Addressing Key Challenges
 
-Note though that to make this work, you must use your `INFURA_API_KEY` and your `MNEMONIC` as GitHub secrets.
+### Challenge: Unsold Tokens or Insufficient Participation
+- If an auction does not sell fully (e.g., no participant or insufficient bids), the developer can define resolution mechanisms such as:
+  - **Refunding bidders** for unfulfilled allocations
+  - **Executing at the lowest bid price** to distribute remaining tokens
 
-You can edit the CI script in [.github/workflows/ci.yml](./.github/workflows/ci.yml).
+### Challenge: Multiple Bidding Attempts
+- **Enforced one-bid-per-user policy** via mapping and bid validation
 
-## Usage
+### Challenge: Bid Modification Before Auction Ends
+- **Prohibited bid modifications** to ensure fairness and prevent manipulation
 
-### Pre Requisites
+### Challenge: Auction Duration
+- Configurable with a minimum enforced duration of **1 hour** to balance efficiency and fairness
 
-Install [pnpm](https://pnpm.io/installation)
+### Challenge: Handling Equal Lowest Bids
+- In case of tie bids, the first submitted bid at the lowest price is prioritized
 
-Before being able to run any command, you need to create a `.env` file and set a BIP-39 compatible mnemonic as the `MNEMONIC`
-environment variable. You can follow the example in `.env.example` or start with the following command:
+### Challenge: Preventing Fake Bids Without Funds
+- **Locking mechanism** ensures funds are deposited before bid submission
 
-```sh
-cp .env.example .env
-```
+## 🚀 Deployment Readiness
 
-If you don't already have a mnemonic, you can use this [website](https://iancoleman.io/bip39/) to generate one. An alternative, if you have [foundry](https://book.getfoundry.sh/getting-started/installation) installed is to use the `cast wallet new-mnemonic` command.
+### Network Support
+- **Sepolia Testnet**
 
-Then, install all needed dependencies - please **_make sure to use Node v20_** or more recent:
-
-```sh
-pnpm install
-```
-
-### Compile
-
-Compile the smart contracts with Hardhat:
-
-```sh
-pnpm compile
-```
-
-### TypeChain
-
-Compile the smart contracts and generate TypeChain bindings:
-
-```sh
-pnpm typechain
-```
-
-### Test
-
-Run the tests with Hardhat - this will run the tests on a local hardhat node in mocked mode (i.e the FHE operations and decryptions will be simulated by default):
-
-```sh
-pnpm test
-```
-
-### Lint Solidity
-
-Lint the Solidity code:
-
-```sh
-pnpm lint:sol
-```
-
-### Lint TypeScript
-
-Lint the TypeScript code:
-
-```sh
-pnpm lint:ts
-```
-
-
-### Clean
-
-Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
-
-```sh
-pnpm clean
-```
-
-### Mocked mode
-
-The mocked mode allows faster testing and the ability to analyze coverage of the tests. In this mocked version,
-encrypted types are not really encrypted, and the tests are run on the original version of the EVM, on a local hardhat
-network instance. To run the tests in mocked mode, you can use directly the following command:
+### Quick Start
 
 ```bash
-pnpm test
+# Clone the repository
+git clone https://github.com/itublockchain/FHE-single-price-auction.git
+
+# Install dependencies
+npm install
+
+# Deploy to Sepolia
+npx hardhat deploy --network sepolia
 ```
 
-You can still use all the usual specific [hardhat network methods](https://hardhat.org/hardhat-network/docs/reference#hardhat-network-methods), such as `evm_snapshot`, `evm_mine`, `evm_increaseTime`, etc, which are very helpful in a testing context. Another useful hardhat feature, is the [console.log](https://hardhat.org/hardhat-network/docs/reference#console.log) function which can be used in fhevm smart contracts in mocked mode as well.
+## 🌐 Future Roadmap
 
-To analyze the coverage of the tests (in mocked mode necessarily, as this cannot be done on the real fhEVM node), you
-can use this command :
+1. **Multi-Token Support**
+2. **Advanced Auction Types**
+3. **Cross-Chain Compatibility**
+4. **Enhanced Privacy Protocols**
 
-```bash
-pnpm coverage
-```
+## 🏆 Zama Bounty Submission Highlights
 
-Then open the file `coverage/index.html`. You can see there which line or branch for each contract which has been
-covered or missed by your test suite. This allows increased security by pointing out missing branches not covered yet by
-the current tests.
+- **Fully Encrypted Auction Mechanism**
+- **Comprehensive Privacy Protection**
+- **Innovative Use of fhEVM**
+- **Scalable and Extensible Design**
 
-Finally, a new fhevm-specific feature is available in mocked mode: the `debug.decrypt[XX]` functions, which can decrypt directly any encrypted value. Please refer to the [utils.ts](https://github.com/zama-ai/fhevm/blob/main/test/utils.ts#L87-L317) file for the corresponding documentation.
+## 📝 Compliance & Security
 
-> [!Note]
-> Due to intrinsic limitations of the original EVM, the mocked version differs in rare edge cases from the real fhEVM, the main difference is the gas consumption for the FHE operations (native gas is around 20% underestimated in mocked mode). This means that before deploying to production, developers should still run the tests with the original fhEVM node, as a final check - i.e in non-mocked mode (see next section).
+### Audit & Verification
+- Detailed code comments
+- Comprehensive documentation
+- Ready for professional security audit
 
-### Non-mocked mode - Sepolia
+### Ethical Considerations
+- Prioritize user privacy
+- Transparent auction mechanics
+- Fair participation guarantees
 
-To run your test on a real fhevm node, you can use the coprocessor deployed on the Sepolia test network. To do this, ensure you are using a valid value `SEPOLIA_RPC_URL` in your `.env` file. You can get free Sepolia RPC URLs by creating an account on services such as [Infura](https://www.infura.io/) or [Alchemy](https://www.alchemy.com/). Then you can use the following command:
+## 🤝 Community & Contributions
 
-```bash
-npx hardhat test [PATH_TO_YOUR_TEST] --network sepolia
-```
+### We Welcome:
+- Bug reports
+- Feature suggestions
+- Performance improvements
+- Privacy enhancement proposals
 
-The `--network sepolia` flag will make your test run on a real fhevm coprocessor. Obviously, for the same tests to pass on Sepolia, contrarily to mocked mode, you are not allowed to use any hardhat node specific method, and neither use any of the `debug.decrypt[XX]` functions.
+### Contribution Guidelines
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push and create a Pull Request
 
-> [!Note]
-> For this test to succeed, first ensure you set your own private `MNEMONIC` variable in the `.env` file and then  ensure you have funded your test accounts on Sepolia. For example you can use the following command to get the corresponding private keys associated with the first `5` accounts derived from the mnemonic: 
-```
-npx hardhat get-accounts --num-accounts 5
-```
-This will let you add them to the Metamask app, to easily fund them from your personal wallet. 
+## 💌 Contact & Support
 
-If you don't own already Sepolia test tokens, you can for example use a free faucet such as [https://sepolia-faucet.pk910.de/](https://sepolia-faucet.pk910.de/).
+- **Email**: [your-email@example.com]
+- **Discord**: [Discord Invite Link]
+- **Twitter**: [@YourProjectHandle]
 
-Another faster way to test the coprocessor on Sepolia is to simply run the following command:
-```
-pnpm deploy-sepolia
-```
-This would automatically deploy an instance of the `MyConfidentialERC20` example contract on Sepolia. You could then use this other command to mint some amount of confidential tokens: 
-```
-pnpm mint-sepolia
-```
+---
 
-### Etherscan verification
+**Disclaimer**: This is a research prototype. Extensive security review recommended for production use.
 
-If you are using a real instance of the fhEVM, you can verify your deployed contracts on the Etherscan explorer. 
-You first need to set the `ETHERSCAN_API_KEY` variable in the `.env` file to a valid value. You can get such an API key for free by creating an account on the [Etherscan website](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics). 
+## 🌟 Special Thanks
 
-Then, simply use the `verify-deployed` hardhat task, via this command:
-```
-npx hardhat verify-deployed --address [ADDRESS_CONTRACT_TO_VERIFY] --contract [FULL_CONTRACT_PATH] --args "[CONSTRUCTOR_ARGUMENTS_COMMA_SEPARATED]" --network [NETWORK_NAME]
-```
-As a concrete example, to verify the deployed `MyConfidentialERC20` from previous section, you can use:
-```
-npx hardhat verify-deployed --address [CONFIDENTIAL_ERC20_ADDRESS] --contract contracts/MyConfidentialERC20.sol:MyConfidentialERC20 --args "Naraggara,NARA" --network sepolia
-```
+- **Zama Team**: For the incredible fhEVM technology
+- **Ethereum Community**: Continuous innovation inspiration
+- **Privacy Advocates**: Driving the decentralization movement
 
-Note that you should replace the address placeholder `[CONFIDENTIAL_ERC20_ADDRESS]` by the concrete address that is logged when you run the `pnpm deploy-sepolia` deployment script.
+<div align="center">
+  <img src="https://img.shields.io/badge/Built%20with-%E2%9D%A4%EF%B8%8F-red?style=for-the-badge" alt="Built with Love"/>
+</div>
 
-### Syntax Highlighting
-
-If you use VSCode, you can get Solidity syntax highlighting with the
-[hardhat-solidity](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity) extension.
-
-## License
-
-This project is licensed under MIT.
