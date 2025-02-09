@@ -6,17 +6,16 @@ import "fhevm/lib/TFHE.sol";
 import { SepoliaZamaFHEVMConfig } from "fhevm/config/ZamaFHEVMConfig.sol";
 import { SepoliaZamaGatewayConfig } from "fhevm/config/ZamaGatewayConfig.sol";
 import "fhevm/gateway/GatewayCaller.sol";
-import "./interfaces/IAuction.sol";
 import "./ConfidentialWETH.sol";
 
 
-contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCaller, IAuction{
+contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCaller {
 
     string public title;
     string public desc;
     uint256 public immutable startTime;
     uint256 public immutable endTime;
-    uint256 public immutable supply;
+    uint64 public immutable supply;
     address public immutable seller;
     bool public isAvailable;
     IERC20 public token; //Auction factory için de güncelle bunu
@@ -43,10 +42,10 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         string memory _title,
         string memory _desc,
         uint256 _deadline,
-        uint256 _supply,
+        uint64 _supply,
         address _seller,
         address _tokenAddress,
-        address _paymentToken
+        address payable _paymentToken
     ) {
         require(_seller != address(0), "Invalid seller");
         require(_deadline >= 1 hours, "Time is too short");
@@ -66,12 +65,15 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         counter = 0;
     }
 
+    event BidSubmitted(uint256 indexed bidId, address indexed bidder, uint256 timestamp);
+    event AuctionFinalized();
+
     function submitBid(
         einput encPrice,
         bytes calldata priceProof,
         einput encAmount,
         bytes calldata amountProof
-    ) external payable override returns(uint256 bidId) {
+    ) external payable returns(uint256 bidId) {
         require(isAvailable, "Auction is not available");
         require(block.timestamp >= startTime, "Auction not started");
         require(block.timestamp < endTime, "Auction ended");
@@ -97,7 +99,7 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
 
         euint64 totalLocked = TFHE.mul(price, amount);
         TFHE.allowThis(totalLocked);
-        isLockDone = paymentToken.transferFrom(msg.sender, address(this), totalLocked);  
+        bool isLockDone = paymentToken.transferFrom(msg.sender, address(this), totalLocked);  
         require(isLockDone, "Locked is not done");
 
         bidId = counter;
@@ -152,9 +154,7 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         emit BidSubmitted(bidId, msg.sender, block.timestamp);
     }
 
-    function finalizeAuction(
-
-    ) external payable override {
+    function finalizeAuction() external payable {
         require(block.timestamp >= endTime, "Auction still active");
         require(isAvailable, "Auction is already finalized");
 
