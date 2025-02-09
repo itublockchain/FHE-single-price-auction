@@ -1,34 +1,23 @@
 "use client";
 
-import * as React from "react";
+import emojiImage from "../../public/smile-plus.svg";
+import { ForwardRefEditor } from "../components";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import EmojiPicker from "emoji-picker-react";
+import { Theme } from "emoji-picker-react";
+import Image from "next/image";
+import * as React from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-
-import EmojiPicker from "emoji-picker-react";
-import emojiImage from "../../public/smile-plus.svg"
-
-import { useState } from "react";
-import Image from "next/image";
 
 const formSchema = z.object({
   title: z
@@ -42,7 +31,7 @@ const formSchema = z.object({
   amount: z.string(),
   description: z.string(),
   date: z.date(),
-  emoji: z.string().max(1),
+  emoji: z.string().min(1, { message: "You need to select an emoji." }),
 });
 
 export default function Create() {
@@ -61,18 +50,48 @@ export default function Create() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    const formData = { ...values, emoji: emojiData };
+    console.log(formData);
   }
 
   return (
-    <div className="w-full h-screen flex flex-col justify-center items-center bg-background dark text-foreground">
+    <div className="w-full h-screen flex flex-col justify-center items-center bg-background dark text-foreground -mt-[80px]">
       <Form {...form}>
-        <h1 className="text-7xl">Create Auction</h1>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 p-6 rounded-lg w-2/3"
-        >
-          <div className="grid grid-cols-4 gap-4">
+        <h1 className="text-7xl w-2/3 pl-4 mb-4 text-left">Create Auction</h1>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-6 rounded-lg w-2/3">
+          <div className="grid w-full justify-between items-end grid-cols-4 gap-4">
+            {emojiData ? (
+              <span className="text-3xl flex justify-center items-center">{emojiData}</span>
+            ) : (
+              <FormField
+                control={form.control}
+                name="emoji"
+                render={({ field }) => (
+                  <FormItem className="justify-center items-center flex flex-col">
+                    <FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant={"outline"} className="">
+                            <Image src={emojiImage} alt="emoji" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <EmojiPicker
+                            theme={Theme.DARK}
+                            searchDisabled={true}
+                            onEmojiClick={(emoji, e) => {
+                              setEmojiData(emoji.emoji);
+                              field.onChange(emoji.emoji);
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="title"
@@ -86,31 +105,6 @@ export default function Create() {
                 </FormItem>
               )}
             />
-            {emojiData ? <span className="text-3xl flex justify-center items-center">{emojiData}</span> : <FormField
-              control={form.control}
-              name="emoji"
-              render={({ field }) => (
-                <FormItem className="flex justify-center items-center">
-                  <FormControl>
-                  <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant={"outline"} className="">
-                          <Image src={emojiImage} alt="emoji" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <EmojiPicker onEmojiClick={(emoji, e) => {
-                          setEmojiData(emoji.emoji)
-                          console.log(emoji.emoji)
-                          field.onChange(emoji.emoji)
-                        }} />
-                      </PopoverContent>
-                    </Popover>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />}
             <FormField
               control={form.control}
               name="amount"
@@ -137,14 +131,10 @@ export default function Create() {
                           variant={"outline"}
                           className={cn(
                             "w-full justify-center text-left font-normal",
-                            !field.value && "text-foreground"
+                            !field.value && "text-foreground",
                           )}
                         >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
+                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -154,8 +144,8 @@ export default function Create() {
                           onSelect={(date) => {
                             if (!date) return;
                             if (date?.getTime() < Date.now()) return;
-                            field.onChange(date)
-                        }}
+                            field.onChange(date);
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
@@ -172,7 +162,7 @@ export default function Create() {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                    <Textarea {...field} />
+                  <ForwardRefEditor markdown="" placeholder="Enter your description here" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

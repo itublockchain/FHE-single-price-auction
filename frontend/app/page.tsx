@@ -138,7 +138,7 @@ const auctions = [
 export default function Home() {
   return (
     <div className="w-full h-screen flex flex-col justify-start items-center overflow-y-scroll">
-      <h1 className="w-4/5 text-5xl font-bold text-left mt-[20px]">Live Auctions</h1>
+      {auctions.filter((auction) => (auction.date.getTime() > Date.now())).length > 0 ? <h1 className="w-4/5 text-5xl font-bold text-left mt-[20px]">Live Auctions</h1> : null}
       <div className="w-4/5 grid grid-cols-3 gap-8 mt-[20px]">
       {auctions.filter((auction) => (auction.date.getTime() > Date.now())).map((auction, index) => (<Card key={index} className="flex flex-col border-foreground/20">
         <CardHeader>
@@ -158,7 +158,7 @@ export default function Home() {
         </CardFooter>
       </Card>))}
       </div>
-      <h1 className="w-4/5 text-5xl font-bold text-left mt-[20px]">Past Auctions</h1>
+      {auctions.filter((auction) => (auction.date.getTime() < Date.now())).length > 0 ? <h1 className="w-4/5 text-5xl font-bold text-left mt-[20px]">Past Auctions</h1> : null}
       <div className="w-4/5 grid grid-cols-3 gap-8 mt-[20px]">
       {auctions.filter((auction) => (auction.date.getTime() < Date.now())).map((auction, index) => (<Card key={index} className="flex flex-col border-foreground/20">
         <CardHeader>
