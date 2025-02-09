@@ -6,8 +6,8 @@ import { AuctionFactory, ConfidentialWETH } from "../types";
 
 task("create-auction")
   .addParam("title", "Title of the auction")
-  .addParam("desc", "Description of the auction")
-  .addParam("deadline", "Auction deadline in hours")
+  .addParam("description", "Description of the auction")
+  .addParam("deadline", "Auction deadline in seconds")
   .addParam("supply", "Token supply for the auction")
   .setAction(async function (taskArguments: TaskArguments, hre: HardhatRuntimeEnvironment) {
     const { ethers, deployments } = hre;
@@ -17,9 +17,9 @@ task("create-auction")
     
     const tx = await auctionFactory.connect(signers[0]).createAuction(
       taskArguments.title,
-      taskArguments.desc,
-      Number(taskArguments.deadline) * 3600, // Convert hours to seconds
-      BigInt(taskArguments.supply)
+      taskArguments.description,
+      taskArguments.deadline,
+      taskArguments.supply
     );
     
     const receipt = await tx.wait();
@@ -39,25 +39,6 @@ task("create-auction")
       console.info("Description:", decodedEvent.desc);
       console.info("Start time:", new Date(Number(decodedEvent.startTime) * 1000).toLocaleString());
       console.info("End time:", new Date(Number(decodedEvent.endTime) * 1000).toLocaleString());
-      console.info("Seller:", decodedEvent.seller);
-    }
-  });
-
-task("mint-confidential-weth")
-  .addParam("amount", "Amount of tokens to mint")
-  .setAction(async function (taskArguments: TaskArguments, hre: HardhatRuntimeEnvironment) {
-    const { ethers, deployments } = hre;
-    const factory = await deployments.get("AuctionFactory");
-    const signers = await ethers.getSigners();
-    const auctionFactory = (await ethers.getContractAt("AuctionFactory", factory.address)) as AuctionFactory;
-    
-    try {
-      const tx = await auctionFactory.connect(signers[0]).mintConfidentialToken(BigInt(taskArguments.amount));
-      const receipt = await tx.wait();
-      console.info("Successfully minted", taskArguments.amount, "Confidential WETH tokens");
-      console.info("Transaction hash:", receipt?.hash);
-    } catch (error) {
-      console.error("Failed to mint Confidential WETH:", error.message);
     }
   });
 
@@ -72,15 +53,11 @@ task("wrap-eth")
     const paymentTokenAddress = await auctionFactory.paymentToken();
     const confidentialWETH = (await ethers.getContractAt("ConfidentialWETH", paymentTokenAddress)) as ConfidentialWETH;
     
-    try {
-      const tx = await confidentialWETH.connect(signers[0]).wrap({
-        value: ethers.parseEther(taskArguments.amount)
-      });
-      
-      const receipt = await tx.wait();
-      console.info("Successfully wrapped", taskArguments.amount, "ETH to ConfidentialWETH");
-      console.info("Transaction hash:", receipt?.hash);
-    } catch (error) {
-      console.error("Failed to wrap ETH:", error.message);
-    }
+    const tx = await confidentialWETH.connect(signers[0]).wrap({
+      value: ethers.parseEther(taskArguments.amount)
+    });
+    
+    const receipt = await tx.wait();
+    console.info("Successfully wrapped", taskArguments.amount, "ETH to ConfidentialWETH");
+    console.info("Transaction hash:", receipt?.hash);
   });

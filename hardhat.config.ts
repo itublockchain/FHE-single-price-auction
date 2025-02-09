@@ -11,9 +11,6 @@ import CustomProvider from "./CustomProvider";
 import "./tasks/accounts";
 import "./tasks/etherscanVerify";
 import "./tasks/auction";
-import "./tasks/mintMyConfidentialERC20";
-
-import { setCodeMocked } from "./test/fhevmjsMocked";
 
 extendProvider(async (provider) => {
   const newProvider = new CustomProvider(provider);
@@ -23,7 +20,7 @@ extendProvider(async (provider) => {
 dotenv.config();
 
 // Ensure that we have all the environment variables we need.
-const mnemonic: string = process.env.MNEMONIC || "test test test test test test test test test test test junk";
+const mnemonic: string = process.env.MNEMONIC!;
 
 const chainIds = {
   zama: 8009,
@@ -42,7 +39,6 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       break;
     case "sepolia":
       jsonRpcUrl = process.env.SEPOLIA_RPC_URL!;
-      break;
   }
   return {
     accounts: {
@@ -93,7 +89,6 @@ const config: HardhatUserConfig = {
       },
       allowUnlimitedContractSize: true,
       blockGasLimit: 1099511627775,
-      chainId: 8009, // Using Zama testnet chain ID for compatibility
     },
     sepolia: getChainConfig("sepolia"),
     zama: getChainConfig("zama"),
@@ -104,8 +99,6 @@ const config: HardhatUserConfig = {
     cache: "./cache",
     sources: "./contracts",
     tests: "./test",
-    deploy: "./deploy",
-    deployments: "./deployments",
   },
   solidity: {
     version: "0.8.24",
@@ -115,24 +108,19 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
       evmVersion: "paris",
-      // These settings are needed for FHE contracts
-      viaIR: true,
-      metadata: {
-        bytecodeHash: "none",
-      },
     },
   },
   typechain: {
     outDir: "types",
     target: "ethers-v6",
   },
-  verify: {
-    etherscan: {
-      apiKey: process.env.ETHERSCAN_API_KEY,
-    },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY!,
   },
   warnings: {
-    "contracts-2518": "error",
+    "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol": {
+      default: "off",
+    },
   },
 };
 

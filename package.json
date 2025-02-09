@@ -89,14 +89,12 @@
     "deploy:sepolia": "hardhat deploy --network sepolia",
     "verify:sepolia": "hardhat verify-deployed --network sepolia",
     "create-auction": "hardhat create-auction",
-    "mint-confidential-weth": "hardhat mint-confidential-weth",
-    "submit-bid": "hardhat submit-bid",
-    "finalize-auction": "hardhat finalize-auction",
-    "get-auction-info": "hardhat get-auction-info",
-    "wrap-eth": "hardhat wrap-eth"
+    "wrap-eth": "hardhat wrap-eth",
+    "place-bid": "hardhat place-bid",
+    "end-auction": "hardhat end-auction",
+    "get-auction-info": "hardhat get-auction-info"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.2",
-    "bigint-buffer": "^1.1.5"
+    "@openzeppelin/contracts": "^5.0.2"
   }
 }
