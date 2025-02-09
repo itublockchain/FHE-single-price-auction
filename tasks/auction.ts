@@ -67,3 +67,36 @@ task("get-auction-info")
       console.error("Failed to get auction info:", error.message);
     }
   });
+
+task("check-factory", "Checks AuctionFactory state")
+  .setAction(async (args, hre) => {
+    const factory = await hre.ethers.getContractAt(
+      "AuctionFactory",
+      "0xa92a4eD7A934cd4E8111Af8F7D6d8D0406674372"
+    );
+    
+    try {
+      // Payment token adresini kontrol et
+      const paymentToken = await factory.paymentToken();
+      console.log("Payment Token:", paymentToken);
+      
+      // Kontratın kodunu kontrol et
+      const code = await hre.ethers.provider.getCode(factory.target);
+      console.log("Contract has code:", code !== "0x");
+      
+      // Kontratın balance'ını kontrol et
+      const balance = await hre.ethers.provider.getBalance(factory.target);
+      console.log("Contract balance:", hre.ethers.formatEther(balance), "ETH");
+
+      // Kontratın fonksiyonlarını göster
+      console.log("Contract functions available:");
+      console.log("- createAuction(string,string,uint256,uint64)");
+      console.log("- mintConfidentialToken(uint64)");
+      console.log("- paymentToken()");
+      console.log("- counter()");
+      console.log("- auctions(uint256)");
+      
+    } catch (error) {
+      console.error("Error checking factory:", error);
+    }
+  });

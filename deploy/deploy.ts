@@ -21,3 +21,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.id = "deploy_auction_factory"; // id required to prevent reexecution
 func.tags = ["AuctionFactory"];
+func.dependencies = []; // No dependencies for the initial deployment
