@@ -6,7 +6,7 @@ import "fhevm/lib/TFHE.sol";
 import { SepoliaZamaFHEVMConfig } from "fhevm/config/ZamaFHEVMConfig.sol";
 import { SepoliaZamaGatewayConfig } from "fhevm/config/ZamaGatewayConfig.sol";
 import "fhevm/gateway/GatewayCaller.sol";
-import "./ConfidentialWETH.sol";
+import { ConfidentialWETH } from "./AuctionFactory.sol";
 
 
 contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCaller {
@@ -18,8 +18,8 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
     uint64 public immutable supply;
     address public immutable seller;
     bool public isAvailable;
-    IERC20 public token; //Auction factory için de güncelle bunu
-    ConfidentialERC20 public paymentToken;
+    IERC20 public token;
+    ConfidentialWETH public paymentToken;
 
     struct Bid {
         address bidder;
