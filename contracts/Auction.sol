@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "fhevm/lib/TFHE.sol";
 import { SepoliaZamaFHEVMConfig } from "fhevm/config/ZamaFHEVMConfig.sol";
 import { SepoliaZamaGatewayConfig } from "fhevm/config/ZamaGatewayConfig.sol";
@@ -18,17 +17,14 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
     uint64 public immutable supply;
     address public immutable seller;
     bool public isAvailable;
-    IERC20 public token;
+    ConfidentialWETH public sellingToken;
     ConfidentialWETH public paymentToken;
 
     struct Bid {
         address bidder;
         euint64 e_pricePerToken;
-        uint64 pricePerToken;
         euint64 e_amount;
-        uint64 amount;
         uint256 timestamp;
-        bool isRevealed;
     }
 
     mapping(uint256 => Bid) public bids;
@@ -41,14 +37,14 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
     constructor(
         string memory _title,
         string memory _desc,
-        uint256 _deadline,
+        uint256 _auctionDuration,
         uint64 _supply,
         address _seller,
         address _tokenAddress,
         address payable _paymentToken
     ) {
         require(_seller != address(0), "Invalid seller");
-        require(_deadline >= 1 hours, "Time is too short");
+        require(_auctionDuration >= 1 hours, "Time is too short");
         require(_supply > 0, "Invalid token amount");
         require(_tokenAddress != address(0), "Invalid token address");
         require(_paymentToken != address(0), "Invalid WETH address");
@@ -56,10 +52,10 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         title = _title;
         desc = _desc;
         startTime = block.timestamp;
-        endTime = block.timestamp + _deadline;
+        endTime = block.timestamp + _auctionDuration;
         supply = _supply;
         seller = _seller;
-        token = IERC20(_tokenAddress);
+        sellingToken = ConfidentialWETH(_tokenAddress);
         paymentToken = ConfidentialWETH(_paymentToken);
         isAvailable = true;
         counter = 0;
@@ -85,8 +81,6 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         require(TFHE.isSenderAllowed(amount), "Unauthorized access");
         require(TFHE.isInitialized(price), "Price not encrypted properly!");
         require(TFHE.isInitialized(amount), "Amount not encrypted properly!");
-
-        //TFHE.allowThis(price); GEREK YOK SANKİ BUNLARA
         
         ebool isValidPrice = TFHE.gt(price, TFHE.asEuint64(0));
         TFHE.allowThis(isValidPrice);
@@ -106,17 +100,12 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         bids[bidId] = Bid(
             msg.sender,
             price,
-            0,
             amount,
-            0,
-            block.timestamp,
-            false
+            block.timestamp
         );
         TFHE.allowThis(bids[bidId].e_pricePerToken);
         TFHE.allowThis(bids[bidId].e_amount);
         
-        //insert part 
-
         if(bidIds.length == 0) {
             bidIds.push(bidId);
         }
@@ -163,40 +152,46 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
             return;
         }
 
-        for(uint256 i = 0; i < bidIds.length; i++) {
-            Bid storage bid = bids[bidIds[i]];
-            requestInt(bid.e_pricePerToken);
-            bid.pricePerToken = decInt;
-            requestInt(bid.e_amount);
-            bid.amount = decInt;
-        }
-
+        euint64 e_totalAllocated = TFHE.asEuint64(0);
+        euint64 e_supply = TFHE.asEuint64(supply);
+        euint64 e_minPrice = TFHE.asEuint64(0);
         uint64 minPrice;
-        uint64 totalAllocated = 0;
-        uint64 lastAmount;
         uint256 index;
+        
         for(uint256 i = 0; i < bidIds.length; i++) {
-            Bid storage bid = bids[bidIds[i]];
-            totalAllocated += bid.amount; 
-            if(totalAllocated >= supply) {
-                minPrice = bid.pricePerToken;
-                lastAmount = bid.amount - (totalAllocated - supply);
+            Bid storage currentBid = bids[bidIds[i]];
+            e_totalAllocated = TFHE.add(e_totalAllocated, currentBid.e_amount);
+            
+            e_minPrice = currentBid.e_pricePerToken;
+            TFHE.allowThis(e_minPrice);
+
+            ebool isDone = TFHE.ge(e_totalAllocated, e_supply);
+            TFHE.allowThis(isDone);            
+            requestBool(isDone);
+
+            if(decValue) {
+                euint64 e_excess = TFHE.sub(e_totalAllocated, e_supply);
+                TFHE.allowThis(e_excess);
+                currentBid.e_amount = TFHE.sub(currentBid.e_amount, e_excess);
+                TFHE.allowThis(currentBid.e_amount);
+                euint64 sendingAmount = TFHE.mul(currentBid.e_pricePerToken, e_excess);
+                paymentToken.transfer(currentBid.bidder, sendingAmount);
                 index = i;
                 break;
-            }    
+            } 
+
+        requestInt(e_minPrice);
+        minPrice = decInt;
         }
 
         for(uint256 i = 0; i <= index; i++) {
-            Bid storage bid = bids[bidIds[i]];
+            Bid storage currentBid = bids[bidIds[i]];
+            euint64 sendingAmount = TFHE.mul(currentBid.e_pricePerToken, currentBid.e_amount);
+            sellingToken.transfer(currentBid.bidder, sendingAmount);
 
-            if(i == index) {
-                token.transfer(bid.bidder, lastAmount);
-            }
-            
-            else {
-                token.transfer(bid.bidder, bid.amount);
-            }
         }
+
+        isAvailable = false;
         emit AuctionFinalized();
     }
 
@@ -222,4 +217,3 @@ contract Auction is SepoliaZamaFHEVMConfig, SepoliaZamaGatewayConfig, GatewayCal
         return decInt;
     }
 }
-

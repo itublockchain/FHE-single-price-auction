@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const AUCTION_FACTORY_ADDRESS = "0xd0eBE51f2911BD0Da9A7A0e5b8F983B640e3d06B";
+const AUCTION_FACTORY_ADDRESS = "0xa92a4eD7A934cd4E8111Af8F7D6d8D0406674372";
 const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL;
 
 const provider = new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
