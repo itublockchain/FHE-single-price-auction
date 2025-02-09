@@ -1,12 +1,11 @@
 import { ethers } from 'ethers';
 import AuctionFactoryABI from './AuctionFactoryABI.json';
-import AuctionABI from './AuctionABI.json';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const AUCTION_FACTORY_ADDRESS = process.env.AUCTION_FACTORY_ADDRESS || "0xd0eBE51f2911BD0Da9A7A0e5b8F983B640e3d06B";
-const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://sepolia.infura.io/v3/914992b6c5644bc28913f443e5dce0a0";
+const AUCTION_FACTORY_ADDRESS = "0xd0eBE51f2911BD0Da9A7A0e5b8F983B640e3d06B";
+const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL;
 
 const provider = new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
 
@@ -15,7 +14,7 @@ const getAuctionFactoryContract = (signer) => {
 };
 
 const getAuctionContract = (auctionAddress, signer) => {
-    return new ethers.Contract(auctionAddress, AuctionABI, signer);
+    return new ethers.Contract(auctionAddress, AuctionFactoryABI, signer);
 };
 
 const connectWallet = async () => {
