@@ -1,6 +1,6 @@
-import Image from "next/image";
 import hourglass from "../../public/HourglassMedium.svg";
 import rocket from "../../public/RocketLaunch.svg";
+import { ForwardReadOnlyRefEditor } from "../components";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -13,20 +13,16 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 const auctionDetails = {
   title: "Car Auction",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus ut nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus ut nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus ut nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus ut nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam. Donec nec nunc nec nunc tincidunt aliquam.",
+  description: `1. denem3\n2. dededed\n3. dededede\n4. dededede`,
   amount: "10000",
   date: new Date(),
 };
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ auction: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ auction: string }> }) {
   const slug = (await params).auction;
   return (
     <div className="flex justify-center items-center w-full h-screen">
@@ -34,15 +30,13 @@ export default async function Page({
         <div>
           <h1 className="text-7xl font-bold mb-2">
             {auctionDetails.title + " " + slug}
-            <span className="text-3xl font-normal ml-2">
-              x{auctionDetails.amount}
-            </span>
+            <span className="text-3xl font-normal ml-2">x{auctionDetails.amount}</span>
           </h1>
           <span className="text-foreground/50">
             by<span className="ml-1 text-foreground">0xabc783...d84</span>
           </span>
         </div>
-        <p className="text-lg my-12">{auctionDetails.description}</p>
+        <ForwardReadOnlyRefEditor markdown={auctionDetails.description} />
         <div className="flex justify-between items-center w-full">
           <div className="flex items-left gap-8">
             <p className="text-lg flex gap-1 text-foreground/60">
@@ -66,16 +60,14 @@ export default async function Page({
               <DrawerContent className="flex flex-col justify-center items-center">
                 <DrawerHeader className="w-1/4">
                   <DrawerTitle>Place a Bid</DrawerTitle>
-                  <DrawerDescription>
-                    Enter bid price and quantity. The cost will be calculated.
-                  </DrawerDescription>
+                  <DrawerDescription>Enter bid price and quantity. The cost will be calculated.</DrawerDescription>
                   <div className="flex justify-between items-center gap-4">
                     <label className="text-sm">Amount</label>
-                  <Input className="w-[250px]" placeholder="Enter amount" />
+                    <Input className="w-[250px]" placeholder="Enter amount" />
                   </div>
                   <div className="flex justify-between items-center gap-4">
                     <label className="text-sm">Price</label>
-                  <Input className="w-[250px]" placeholder="Enter price" />
+                    <Input className="w-[250px]" placeholder="Enter price" />
                   </div>
                   <div className="h-[1px] w-full bg-white/20 my-4"></div>
                   <p>Total Cost: 1.0 ETH</p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Textarea } from "@/components/ui/textarea";
 import {
   headingsPlugin,
   listsPlugin,
@@ -7,53 +8,27 @@ import {
   thematicBreakPlugin,
   markdownShortcutPlugin,
   linkPlugin,
-  toolbarPlugin,
   linkDialogPlugin,
-  UndoRedo,
-  BoldItalicUnderlineToggles,
-  CreateLink,
-  CodeToggle,
   MDXEditor,
-  ListsToggle,
   tablePlugin,
-  InsertTable,
-  InsertThematicBreak,
   type MDXEditorMethods,
   type MDXEditorProps,
 } from "@mdxeditor/editor";
 import type { ForwardedRef } from "react";
 
 // Only import this to the next file
-export default function InitializedMDXEditor({
+export default function ReadOnlyMDX({
   editorRef,
   ...props
 }: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
   return (
     <MDXEditor
+      readOnly={true}
       className="markdown-editor dark dark-theme text-foreground"
       plugins={[
         // Example Plugin Usage
-        headingsPlugin({
-          allowedHeadingLevels: [1, 2, 3, 4],
-        }),
+        headingsPlugin(),
         tablePlugin(),
-        toolbarPlugin({
-          toolbarClassName: "mdx-toolbar",
-          toolbarContents: () => {
-            return (
-              <>
-                {" "}
-                <UndoRedo />
-                <BoldItalicUnderlineToggles />
-                <CreateLink />
-                <CodeToggle />
-                <ListsToggle />
-                <InsertTable />
-                <InsertThematicBreak />
-              </>
-            );
-          },
-        }),
         listsPlugin(),
         linkPlugin(),
         quotePlugin(),
