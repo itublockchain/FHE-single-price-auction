@@ -11,6 +11,8 @@ import CustomProvider from "./CustomProvider";
 import "./tasks/accounts";
 import "./tasks/etherscanVerify";
 import "./tasks/auction";
+import "./tasks/balance";
+import "./tasks/factory-info";
 
 extendProvider(async (provider) => {
   const newProvider = new CustomProvider(provider);
@@ -70,6 +72,9 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   namedAccounts: {
     deployer: 0,
+    seller1: 1,
+    seller2: 2,
+    seller3: 3,
   },
   mocha: {
     timeout: 500000,
