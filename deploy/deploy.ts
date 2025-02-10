@@ -11,8 +11,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [], // Constructor doesn't take any arguments
     log: true,
   });
-
-  console.log(`AuctionFactory contract deployed to: ${auctionFactory.address}`);
   
   // The AuctionFactory constructor will automatically deploy ConfidentialWETH
   console.log(`ConfidentialWETH can be found by calling paymentToken() on the AuctionFactory`);

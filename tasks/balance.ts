@@ -6,7 +6,7 @@ task("check-balance", "Checks token balance")
   .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
     const factory = await hre.ethers.getContractAt(
       "AuctionFactory",
-      "0xa92a4eD7A934cd4E8111Af8F7D6d8D0406674372"
+      "0xc0A08fA8fAb6E4F43327AA3F94F95463790FBa48"
     );
     
     try {

@@ -10,7 +10,6 @@ import CustomProvider from "./CustomProvider";
 // Import tasks
 import "./tasks/accounts";
 import "./tasks/etherscanVerify";
-import "./tasks/auction";
 import "./tasks/balance";
 import "./tasks/factory-info";
 
@@ -59,6 +58,24 @@ task("coverage").setAction(async (taskArgs, hre, runSuper) => {
 
   await runSuper(taskArgs);
 });
+
+// Add this function to mock contract code for testing
+async function setCodeMocked(hre: any) {
+  // This is a placeholder implementation
+  // In a real scenario, you might want to add specific mocking logic
+  console.log("Setting up code mocking for testing...");
+  
+  // Example of potential mocking (adjust as needed)
+  const { ethers } = hre;
+  const provider = ethers.provider;
+  
+  // You can add specific contract code mocking here if required
+  // For example:
+  // await provider.send("hardhat_setCode", [
+  //   contractAddress,
+  //   "0x..." // Mocked bytecode
+  // ]);
+}
 
 task("test", async (_taskArgs, hre, runSuper) => {
   // Run modified test task
