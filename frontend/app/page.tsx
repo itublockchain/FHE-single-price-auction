@@ -207,7 +207,9 @@ export default function Home() {
               {auction.result[0]}
               <span className="text-sm ml-1">x{auction.result[7]}</span>
             </CardTitle>
-            <CardDescription>{auction.result[1]}</CardDescription>
+            <CardDescription>
+              {auction.result[1].slice(0, 50) + (auction.result[1].length > 50 ? "..." : "")}
+            </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-between items-center">
             <Button>
@@ -232,7 +234,7 @@ export default function Home() {
               {auction.result[0]}
               <span className="text-sm ml-1">x{auction.result[7].toString()}</span>
             </CardTitle>
-            <CardDescription>{auction.result[1]}</CardDescription>
+            <CardDescription>{auction.result[1].slice(0, 20)}</CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-between items-center">
             <Button variant={"outline"}>
