@@ -22,6 +22,8 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "emoji-picker-react": "^4.12.0",
+    "ethers": "^6.13.5",
+    "fhevmjs": "^0.6.2",
     "lucide-react": "^0.474.0",
     "next": "^15.1.6",
     "react": "^19.0.0",
